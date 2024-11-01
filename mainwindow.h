@@ -28,8 +28,6 @@ private slots:
 
     void on_OR_clicked();
 
-    void on_MaskValue_cursorPositionChanged(int arg1, int arg2);
-
     void on_OpenFile_clicked();
 
     void on_SavePath_clicked();
@@ -42,7 +40,9 @@ private slots:
 
     void on_SaveRule_checkStateChanged(const Qt::CheckState &indexCheck);
 
-    void on_MaskValue_textEdited(const QString &arg1);
+    void on_MaskValue_editingFinished(const QString &maskValue);
+
+    void on_MaskValue_editingFinished();
 
 private:
     Ui::MainWindow *ui;

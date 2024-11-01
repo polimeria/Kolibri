@@ -30,32 +30,34 @@ g) значение 8 байт для бинарной операции моди
 
 Setting settingStruct;
 
-MainWindow::MainWindow(QWidget *parent)
+MainWindow::MainWindow(QWidget *parent)// конструктор
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 }
 
-MainWindow::~MainWindow()
+MainWindow::~MainWindow() // декструтор
 {
     delete ui;
 }
 
-void MainWindow::on_OpenFile_clicked()
+void MainWindow::on_OpenFile_clicked()// входной файл, например .txt, testFile.bin
 {
     //openFile();
-    QString filtred="*.bin *.txt";
-    settingStruct.inputStr = QFileDialog::getOpenFileName(nullptr, "выбрать файл", "", filtred);
+    QString filtred="*.bin *.txt"; // создание объекта класса QString
+    settingStruct.inputStr = QFileDialog::getOpenFileName(nullptr, "выбрать файл", "", filtred); //создание объект класса QString, результат работы getOpenFileName равен новой переменной
+
 }
 
-void MainWindow::on_SavePath_clicked()
+void MainWindow::on_SavePath_clicked()//путь для сохранения результирующих файлов
 {
     //savePath();
-    QString selectedPath = QFileDialog::getExistingDirectory(nullptr, "выбрать путь", "");
+    QString selectedPath = QFileDialog::getExistingDirectory(nullptr, "выбрать путь", "");//создание объект класса QString, результат работы  равен новой переменной, что за метод
 
     settingStruct.savePath=selectedPath;
 }
+// Эти функции обрабатывают нажатие кнопок для выбора логического оператора (XOR, AND, OR). Выбранный оператор сохраняется в структуре settingStruct, в поле logicalOperator.
 
 void MainWindow::on_XOR_clicked()
 {
@@ -73,19 +75,7 @@ void MainWindow::on_OR_clicked()
     settingStruct.logicalOperator="OR";
 }
 
-void MainWindow::on_MaskValue_cursorPositionChanged(int arg1, int arg2)
-{
-    QByteArray newMask = QByteArray::fromHex(ui->MaskValue->text().toUtf8());
-    if (newMask != settingStruct.Mask) {
-        if (!newMask.isEmpty()) {
-            settingStruct.Mask = newMask;
-        } else {
-            QMessageBox::critical(this, "Error", "Invalid mask value. Please enter a valid hexadecimal mask.");
-            settingStruct.Mask = QByteArray::fromHex("00000001");
-        }
-    }
-}
-
+//та функция вызывается при изменении состояния флажка (чекбокса). Если флажок установлен (состояние Checked), вызывается метод QFile::remove(), который удаляет файл, путь к которому хранится в поле DeleteFile структуры settingStruct.
 
 void MainWindow::on_DeleteFile_checkStateChanged(const Qt::CheckState &checkState)
 {
@@ -144,13 +134,22 @@ void MainWindow::on_SaveRule_checkStateChanged(const Qt::CheckState &indexCheck)
 }
 
 
-void MainWindow::on_MaskValue_textEdited(const QString &maskValue)
+void MainWindow::on_MaskValue_editingFinished()
 {
-    QByteArray mask = ui->MaskValue->text().toUtf8();
-    if (!mask.isEmpty()) {
-        settingStruct.Mask = mask;
-    } else {
-        QMessageBox::critical(this, "Error", "Invalid mask value. Please enter a valid hexadecimal mask.");
-        settingStruct.Mask = QByteArray::fromHex("00000001");
+    QString maskValue = ui->MaskValue->text();  // Получение значения из UI
+
+    // Проверка, что строка содержит только шестнадцатеричные символы и имеет четную длину
+    static const QRegularExpression hexRegex("^[0-9A-Fa-f]{2,}$");
+    if (hexRegex.match(maskValue).hasMatch() && (maskValue.size() % 2 == 0)) {
+        QByteArray mask = QByteArray::fromHex(maskValue.toLatin1());
+        if (!mask.isEmpty()) {
+            settingStruct.Mask = mask;
+            return;
+        }
     }
+    QMessageBox::critical(this, "Error", "Invalid mask value. Please enter a valid hexadecimal mask.");
 }
+
+
+
+
