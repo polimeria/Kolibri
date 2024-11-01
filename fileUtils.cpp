@@ -10,6 +10,7 @@
 
 #include <QDebug>
 
+//метод fileReaders из класса FileUtils предназначен для чтения содержимого файла в виде массива байт (QByteArray).
 QByteArray FileUtils::fileReaders (QString& fileName)
 {
     QByteArray byteFile; // хранение данных, считанных из файла
@@ -26,7 +27,7 @@ QByteArray FileUtils::fileReaders (QString& fileName)
     return byteFile;//Возвращается массив байт, содержащий данные файла.
 }
 
-QString FileUtils::textModify (QByteArray &fileReaders, QByteArray& value, QString& logicalOperator)
+QByteArray FileUtils::textModify (QByteArray &fileReaders, QByteArray& value, QString& logicalOperator)
 {
     if (fileReaders.isEmpty() )
         return "";
@@ -50,42 +51,33 @@ QString FileUtils::textModify (QByteArray &fileReaders, QByteArray& value, QStri
 
     }
 
-    QString newText=QString::fromUtf8(fileReaders);
+    // по необходимости добавить проверку для fileReaders.
+    //QString newText = QString::fromUtf8(fileReaders);
+    //QString newText = QString::fromLatin1(fileReaders);
+    // Для проверки.
+
     FileUtils::textModifyReverse(fileReaders,value,logicalOperator);
-    return newText;
+    return fileReaders;
 
 }
 
-QString FileUtils::textModifyReverse(QByteArray &fileReaders, QByteArray& value, QString& logicalOperator)
+QByteArray FileUtils::textModifyReverse(QByteArray &fileReaders, const QByteArray &value, const QString &logicalOperator)
 {
-    QString reverseOriginalText = QString::fromUtf8(fileReaders);
     if (fileReaders.isEmpty() || value.isEmpty())
-        return "";
+        return QByteArray();
 
-    if (logicalOperator != "XOR" && logicalOperator != "AND" && logicalOperator != "OR")
-        return reverseOriginalText;
-
-    for (int i = 0; i < fileReaders.size(); ++i)
-    {
-        if (logicalOperator == "XOR")
-        {
+    if (logicalOperator == "XOR") {
+        for (int i = 0; i < fileReaders.size(); ++i) {
             fileReaders[i] ^= value[i % value.size()];
-        }
-        else if (logicalOperator == "AND")
-        {
-            fileReaders[i] &= ~value[i % value.size()];
-        }
-        else if (logicalOperator == "OR")
-        {
-            fileReaders[i] |= ~value[i % value.size()];
         }
     }
 
-    QString newText = QString::fromUtf8(fileReaders);
-    return newText;
+    return fileReaders;
 }
 
-bool FileUtils::saveFile(const QString& savePath, const QString& newText, const QString& oldFileName, bool& checkState, bool overwrite)
+
+
+bool FileUtils::saveFile(const QString& savePath, const QByteArray& newText, const QString& oldFileName, bool& checkState, bool overwrite)
 {
     QString appendName = "_output";
     QString fileExtension = QFileInfo(oldFileName).suffix();
@@ -137,20 +129,24 @@ bool FileUtils::saveFile(const QString& savePath, const QString& newText, const 
     return true;
 }
 
-void FileUtils::readModifcateFile (Setting& settingStruct, ModifiedText& text)
+void FileUtils::readModifcateFile(Setting& settingStruct, ModifiedText& text)
 {
     if (!warningMessange(settingStruct))
-        return ;
+        return;
 
-    // settingStruct.
-    QByteArray fileCont= FileUtils::fileReaders(settingStruct.inputStr);
-    QString newText=FileUtils::textModify(fileCont,settingStruct.Mask,settingStruct.logicalOperator);
-    text.text=newText;
-    QByteArray byteArrayText = newText.toUtf8();
-    text.reverseText =FileUtils::textModifyReverse(byteArrayText,settingStruct.Mask,settingStruct.logicalOperator);
-    FileUtils::saveFile(settingStruct.savePath,newText,settingStruct.inputStr, settingStruct.checkState, settingStruct.saveRule);
+    QByteArray fileCont = FileUtils::fileReaders(settingStruct.inputStr);
+    QByteArray modifiedData = FileUtils::textModify(fileCont, settingStruct.Mask, settingStruct.logicalOperator);
 
+    // Конвертация модифицированных данных в QString для text
+    text.text = QString::fromLatin1(modifiedData);
+
+    // Обратное преобразование и заполнение reverseText
+    text.reverseText = QString::fromLatin1(FileUtils::textModifyReverse(modifiedData, settingStruct.Mask, settingStruct.logicalOperator));
+
+    // Сохранение файла
+    FileUtils::saveFile(settingStruct.savePath, modifiedData, settingStruct.inputStr, settingStruct.checkState, settingStruct.saveRule);
 }
+
 
 bool FileUtils::warningMessange(Setting& settingStruct)
 {

@@ -24,11 +24,11 @@ public:
     //чтение файла
     static QByteArray fileReaders (QString& fileName);
     //модификация файла
-    static  QString textModify (QByteArray& fileReaders, QByteArray& value, QString& logicalOperator);
+    static  QByteArray textModify (QByteArray& fileReaders, QByteArray& value, QString& logicalOperator);
     // Обратная модификация текста
-    static QString textModifyReverse(QByteArray &fileReaders, QByteArray& value, QString& logicalOperator);
+    static QByteArray textModifyReverse(QByteArray &fileReaders, const QByteArray &value, const QString &logicalOperator);
     //сохранение
-    static bool saveFile(const QString& savePath, const QString& newText, const QString& oldFileName, bool& checkState, bool overwrite = true);
+    static bool saveFile(const QString& savePath, const QByteArray& newText, const QString& oldFileName, bool& checkState, bool overwrite = true);
     //вызов функций
     static void readModifcateFile (Setting& settingStruct, ModifiedText& text);
     // Сообщение с предупреждением.
