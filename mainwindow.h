@@ -40,8 +40,6 @@ private slots:
 
     void on_SaveRule_checkStateChanged(const Qt::CheckState &indexCheck);
 
-    void on_MaskValue_editingFinished(const QString &maskValue);
-
     void on_MaskValue_editingFinished();
 
 private:
